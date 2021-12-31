@@ -11,20 +11,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.api as sm
 import warnings
-import joblib
 
 from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import classification_report
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import roc_curve
-from sklearn.model_selection import RepeatedStratifiedKFold
-from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve, classification_report
+from sklearn.model_selection import RepeatedStratifiedKFold, GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
-# from tpot import TPOTClassifier
 
 warnings.filterwarnings('ignore')
 
@@ -53,7 +46,6 @@ def data_loader(path):
 
 
 '''Predict cancellation based on lead time, number of nights, number of staying guests, distribution channel ...'''
-
 
 
 # Data Exploration
@@ -157,6 +149,8 @@ def knn(city_cancellation):
     # Define dependent and independent variables
     Y = city_cancellation['is_canceled'].to_numpy()
     X = city_cancellation.iloc[:, 1:].to_numpy()
+
+    _, X_test, _, Y_test = train_test_split(X, Y, test_size=0.33, random_state=13)
     
     # Define model with default parameters
     model = KNeighborsClassifier()
@@ -175,7 +169,9 @@ def knn(city_cancellation):
     
     # Show best score and config
     accuracy = grid_result.best_score_
-    print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+    # print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+    y_pred = grid_result.best_params_.fit(X_test)
+    matrix = confusion_matrix(Y_test, y_pred)
     
     # Show all computed scores
     means = grid_result.cv_results_['mean_test_score']
@@ -184,7 +180,7 @@ def knn(city_cancellation):
     for mean, std, param in zip(means, stds, params):
         print("%f (%f) with: %r" % (mean, std, param))
 
-    return accuracy
+    return accuracy, matrix
 
 
 if __name__ == '__main__':
@@ -194,6 +190,8 @@ if __name__ == '__main__':
     cancel_data = data_transform(data)
 
     log_acc, log_matrix = logistic_regression(cancel_data)
-    knn_acc = knn(cancel_data)
+    knn_acc, knn_matrix = knn(cancel_data)
 
     print(log_acc, knn_acc)
+    print(log_matrix)
+    print(knn_matrix)
