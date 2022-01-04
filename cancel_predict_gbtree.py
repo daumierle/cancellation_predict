@@ -1,13 +1,9 @@
 import pandas as pd
-import numpy as np
 import warnings
 import joblib
 
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import classification_report
-from sklearn.model_selection import RepeatedStratifiedKFold
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import train_test_split, RepeatedStratifiedKFold, GridSearchCV
+from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.ensemble import GradientBoostingClassifier
 
 warnings.filterwarnings('ignore')
@@ -112,6 +108,9 @@ if __name__ == "__main__":
 
         model.fit(X_train, Y_train)
         Y_pred = model.predict(X_test)
+        accuracy = model.score(X_test, Y_test)
+        matrix = confusion_matrix(Y_test, Y_pred)
 
-        print(confusion_matrix(Y_test, Y_pred))
+        print(accuracy)
+        print(matrix)
         print(classification_report(Y_test, Y_pred))

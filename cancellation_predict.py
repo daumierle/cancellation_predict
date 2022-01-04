@@ -168,9 +168,9 @@ def knn(city_cancellation):
     grid_result = grid_search.fit(X, Y)
     
     # Show best score and config
-    accuracy = grid_result.best_score_
     # print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
     y_pred = grid_result.best_estimator_.predict(X_test)
+    accuracy = grid_result.best_estimator_.score(X_test, Y_test)
     matrix = confusion_matrix(Y_test, y_pred)
     
     # Show all computed scores
