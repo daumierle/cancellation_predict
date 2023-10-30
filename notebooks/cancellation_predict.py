@@ -14,7 +14,7 @@ import warnings
 
 from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import RFE
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, Lasso
 from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve, classification_report
 from sklearn.model_selection import RepeatedStratifiedKFold, GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
@@ -80,8 +80,8 @@ def data_viz(cancel_city):
 def data_transform(cancel_city):
     cat_vars = ['distribution_channel', 'deposit_type', 'customer_type']
     for var in cat_vars:
-        cat_list = 'var' + '_' + var
-        cat_list = pd.get_dummies(cancel_city[var], prefix=var)
+        # cat_list = 'var' + '_' + var
+        cat_list = pd.get_dummies(cancel_city[var], prefix=var, dtype=float)
         data = cancel_city.join(cat_list)
         cancel_city = data
     data_vars = cancel_city.columns.values.tolist()
@@ -89,6 +89,18 @@ def data_transform(cancel_city):
     city_cancellation = cancel_city[to_keep]
 
     return city_cancellation
+
+
+def data_transform_v2(cancel_city):
+    cat_vars = ['distribution_channel', 'deposit_type', 'customer_type']
+    for var in cat_vars:
+        unique_vals = list()
+        for val in cancel_city[var]:
+            if val not in unique_vals:
+                unique_vals.append(val)
+        mapping = {val: i + 1 for i, val in enumerate(unique_vals)}
+        cancel_city[var] = cancel_city[var].map(mapping)
+    return cancel_city
 
 
 def logistic_regression(city_cancellation):
@@ -105,23 +117,30 @@ def logistic_regression(city_cancellation):
     
     logreg = LogisticRegression(max_iter=5000)
     
-    rfe = RFE(logreg, 10)
+    rfe = RFE(logreg, n_features_to_select=10)
     rfe = rfe.fit(X_train, Y_train.values.ravel())
-    # print(rfe.support_)
-    # print(rfe.ranking_)
-    
-    cols = ['is_repeated_guest', 'previous_cancellations', 'required_car_parking_spaces', 'distribution_channel_Corporate', 
-            'distribution_channel_Direct', 'deposit_type_No Deposit', 'deposit_type_Non Refund', 'customer_type_Transient']
+    col_idx = np.where(rfe.ranking_ == 1)[0].tolist()
+    # print(col_idx)
+    # print([X_train.columns[i] for i in col_idx])
+    # 1 / 0
+    cols = [X_train.columns[i] for i in col_idx]
+    # cols = ['is_repeated_guest', 'previous_cancellations', 'required_car_parking_spaces', 'distribution_channel_Corporate',
+    #         'distribution_channel_Direct', 'deposit_type_No Deposit', 'deposit_type_Non Refund', 'customer_type_Transient']
     X = X_train[cols]
     Y = Y_train['is_canceled']
     
     # Implementing the model
-    logit_model = sm.Logit(Y, X)
-    result = logit_model.fit(method='bfgs')
+    # logit_model = sm.Logit(Y, X)
+    # result = logit_model.fit(method='bfgs')
     
     # Fit Regression Model & Predict Test Set
-    logreg.fit(X_train, Y_train)
+    logreg = Lasso(alpha=0.001, random_state=10)
+    logreg.fit(X, np.log(Y))
+    X_test = X_test[cols]
+    Y_test = Y_test['is_canceled']
     y_pred = logreg.predict(X_test)
+    print(Y_test.tolist())
+    print([np.exp(pred) for pred in y_pred.tolist()])
     accuracy = logreg.score(X_test, Y_test)
     
     # Model Evaluation
@@ -184,10 +203,10 @@ def knn(city_cancellation):
 
 
 if __name__ == '__main__':
-    data_path = 'D:/Project/datasets/hotel_bookings.csv'
+    data_path = 'D:\\Works\\datasets\\hotel_booking\\hotel_bookings.csv'
 
     data = data_loader(data_path)
-    cancel_data = data_transform(data)
+    cancel_data = data_transform_v2(data)
 
     log_acc, log_matrix = logistic_regression(cancel_data)
     knn_acc, knn_matrix = knn(cancel_data)

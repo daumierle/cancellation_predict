@@ -1,0 +1,4 @@
+# ignore all json, csv and pkl files
+*.json
+*.csv
+*.pkl

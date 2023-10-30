@@ -1,0 +1,10 @@
+torch==2.0.1
+pandas
+numpy
+matplotlib
+joblib
+statsmodels
+scikit-learn
+seaborn
+pydantic
+strictyaml
