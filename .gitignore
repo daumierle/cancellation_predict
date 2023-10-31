@@ -2,3 +2,6 @@
 *.json
 *.csv
 *.pkl
+
+# ignore pycache files
+*.pyc
