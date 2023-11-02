@@ -1,4 +1,5 @@
 import os
+import json
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -119,12 +120,30 @@ def data_transform(cancel_city):
 
 
 def data_transform_v2(cancel_city):
+    """
+    Transform categorical variable into numerical variable by using mapping
+    :param cancel_city: dataframe
+    :return:
+    """
     cat_vars = ['distribution_channel', 'deposit_type', 'customer_type']
-    for var in cat_vars:
-        unique_vals = list()
-        for val in cancel_city[var]:
-            if val not in unique_vals:
-                unique_vals.append(val)
-        mapping = {val: i + 1 for i, val in enumerate(unique_vals)}
+    mapping_fn = DATASET_DIR / "mapping.json"
+    if os.path.exists(mapping_fn):
+        with open(mapping_fn, "r", encoding="utf-8") as mapping_file:
+            var_mapping = json.load(mapping_file)
+    else:
+        var_mapping = dict()
+        for var in cat_vars:
+            unique_vals = list()
+            for val in cancel_city[var]:
+                if val not in unique_vals:
+                    unique_vals.append(val)
+            mapping = {val: i + 1 for i, val in enumerate(unique_vals)}
+            var_mapping[var] = mapping
+
+        with open(mapping_fn, "w", encoding="utf-8") as mapping_file:
+            json.dump(var_mapping, mapping_file)
+
+    for var, mapping in var_mapping.items():
         cancel_city[var] = cancel_city[var].map(mapping)
+
     return cancel_city

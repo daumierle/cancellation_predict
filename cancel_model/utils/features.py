@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from cancel_model.config.core import DATASET_DIR
 
 
-def feature_selection(X_train: None, Y_train: None):
+def feature_selection(X_train=None, Y_train=None):
     feat_path = Path(f"{DATASET_DIR}/feats.json")
     if os.path.exists(feat_path):
         # load selected features

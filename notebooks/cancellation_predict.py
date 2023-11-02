@@ -45,9 +45,6 @@ def data_loader(path):
     return cancel_city
 
 
-'''Predict cancellation based on lead time, number of nights, number of staying guests, distribution channel ...'''
-
-
 # Data Exploration
 def data_explore(cancel_city):
     sns.countplot(x='is_canceled', data=cancel_city, palette='hls')
@@ -120,9 +117,6 @@ def logistic_regression(city_cancellation):
     rfe = RFE(logreg, n_features_to_select=10)
     rfe = rfe.fit(X_train, Y_train.values.ravel())
     col_idx = np.where(rfe.ranking_ == 1)[0].tolist()
-    # print(col_idx)
-    # print([X_train.columns[i] for i in col_idx])
-    # 1 / 0
     cols = [X_train.columns[i] for i in col_idx]
     # cols = ['is_repeated_guest', 'previous_cancellations', 'required_car_parking_spaces', 'distribution_channel_Corporate',
     #         'distribution_channel_Direct', 'deposit_type_No Deposit', 'deposit_type_Non Refund', 'customer_type_Transient']
@@ -134,13 +128,12 @@ def logistic_regression(city_cancellation):
     # result = logit_model.fit(method='bfgs')
     
     # Fit Regression Model & Predict Test Set
-    logreg = Lasso(alpha=0.001, random_state=10)
-    logreg.fit(X, np.log(Y))
+    logreg.fit(X, Y)
     X_test = X_test[cols]
     Y_test = Y_test['is_canceled']
     y_pred = logreg.predict(X_test)
     print(Y_test.tolist())
-    print([np.exp(pred) for pred in y_pred.tolist()])
+    print(y_pred.tolist())
     accuracy = logreg.score(X_test, Y_test)
     
     # Model Evaluation
