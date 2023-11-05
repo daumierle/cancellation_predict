@@ -28,13 +28,10 @@ def load_dataset(file_name):
     df['revenue'] = df['adr'] * df['length_of_stay']
     df['occupants'] = df['adults'] + df['children'].fillna(value=0) + df['babies']
 
-    cancel_city = df.loc[
-        df['hotel'] == 'City Hotel', ['is_canceled', 'lead_time', 'length_of_stay', 'occupants', 'distribution_channel',
-                                      'is_repeated_guest',
-                                      'previous_cancellations', 'previous_bookings_not_canceled', 'booking_changes',
-                                      'deposit_type',
-                                      'days_in_waiting_list', 'customer_type', 'adr', 'required_car_parking_spaces',
-                                      'total_of_special_requests']]
+    cancel_city = df[['is_canceled', 'lead_time', 'length_of_stay', 'occupants', 'distribution_channel',
+                      'is_repeated_guest', 'previous_cancellations', 'previous_bookings_not_canceled', 'booking_changes',
+                      'deposit_type', 'days_in_waiting_list', 'customer_type', 'adr', 'required_car_parking_spaces',
+                      'total_of_special_requests']]
 
     return cancel_city
 
