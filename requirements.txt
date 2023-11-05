@@ -7,4 +7,6 @@ statsmodels
 scikit-learn
 seaborn
 pydantic
+loguru
 strictyaml
+fastapi

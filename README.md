@@ -18,8 +18,8 @@ To train the model
 python cancel_model/train.py
 ```
 
-To test the model
+To test the model using FastAPI
 ```commandline
-python cancel_model/predict.py
+python app/main.py
 ```
 
